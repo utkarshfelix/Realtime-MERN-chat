@@ -11,8 +11,8 @@ Both should be installed and make sure mongodb is running.
 Now clone the reprository in your local machine 
 
 ```shell
-git clone https://github.com/utkarshfelix/Realtime-MERN-chat.git
-cd chat-app-react-nodejs
+git clone https://github.com/utkarshfelix/Realtime-MERN-chat
+cd Realtime-MERN-chat
 ```
 
 Now install the dependencies
