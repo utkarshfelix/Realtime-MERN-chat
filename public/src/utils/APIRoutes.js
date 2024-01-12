@@ -6,3 +6,5 @@ export const allUsersRoute = `${host}/api/auth/allusers`;
 export const sendMessageRoute = `${host}/api/messages/addmsg`;
 export const recieveMessageRoute = `${host}/api/messages/getmsg`;
 export const setAvatarRoute = `${host}/api/auth/setavatar`;
+export const firebaseLoginRoute = `${host}/api/auth/firebaseLogin`;
+export const checkUsernameRoute = `${host}/api/auth/checkusername`;

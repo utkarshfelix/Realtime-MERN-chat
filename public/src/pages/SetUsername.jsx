@@ -1,16 +1,27 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import styled from "styled-components";
-import { useNavigate, Link } from "react-router-dom";
-import Logo from "../assets/logo.svg";
+import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { loginRoute } from "../utils/APIRoutes";
-import SocialLoginButtons from "../components/SocialLoginButtons";
+import { checkUsernameRoute, loginRoute } from "../utils/APIRoutes";
+import { onAuthStateChanged } from "firebase/auth";
+import { firebaseAuth } from "../utils/firebaseConfig";
 
-export default function Login() {
+export default function SetUsername() {
   const navigate = useNavigate();
-  const [values, setValues] = useState({ username: "", password: "" });
+  onAuthStateChanged(firebaseAuth , (userData) => {
+    if(!userData){
+      navigate("/login");
+    } else {
+      setEmail( userData.email ? userData.email : userData.providerData[0].email );
+    }
+  })
+  const [values, setValues] = useState("");
+  const [label, setLabel] = useState("");
+  const [email, setEmail] = useState(undefined);
+  const [userNameStatus, setUserNameStatus] = useState(undefined);
+
   const toastOptions = {
     position: "bottom-right",
     autoClose: 4000,
@@ -29,14 +40,10 @@ export default function Login() {
   };
 
   const validateForm = () => {
-    const { username, password } = values;
-    if (username === "") {
-      toast.error("Email and Password is required.", toastOptions);
+    if (values.length < 3) {
+      toast.error("Username is required.", toastOptions);
       return false;
-    } else if (password === "") {
-      toast.error("Email and Password is required.", toastOptions);
-      return false;
-    }
+    } 
     return true;
   };
 
@@ -56,39 +63,57 @@ export default function Login() {
           process.env.REACT_APP_LOCALHOST_KEY,
           JSON.stringify(data.user)
         );
-
         navigate("/");
       }
     }
   };
 
+  const checkUsername = async (username) => {
+    if(username.length > 3) {
+      const { data } = await axios.post
+      ( checkUsernameRoute, {username});
+      setUserNameStatus(data.status);
+      setLabel(data.msg);
+      setValues(username);
+    }
+  }
   return (
     <>
       <FormContainer>
-        <form action="" onSubmit={(event) => handleSubmit(event)}>
-          <div className="brand">
-            <img src={Logo} alt="logo" />
-            <h1>SyncChat</h1>
-          </div>
+        {email && (
+          <form action="" onSubmit={(event) => handleSubmit(event)}>
+          <span>Check Username Availability</span>
+          <div className="row">
           <input
+            className={
+              `${
+                userNameStatus 
+                ? "success" 
+                : userNameStatus !== undefined
+                ? "danger"
+                : ""
+              }`
+            }
             type="text"
             placeholder="Username"
             name="username"
-            onChange={(e) => handleChange(e)}
+            onChange= {(e) => checkUsername(e.target.value)}
             min="3"
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            name="password"
-            onChange={(e) => handleChange(e)}
-          />
-          <button type="submit" className="btn">Log In</button>
-          <SocialLoginButtons />
-          <span>
-            Don't have an account ? <Link to="/register">Register</Link>
-          </span>
+            />
+          <label htmlFor="" className={
+            `${
+              userNameStatus 
+              ? "success" 
+              : userNameStatus !== undefined
+              ? "danger"
+              : ""
+            }`
+          }
+            > {label}</label>
+          </div>
+          <button type="submit" className="btn">Create User</button>
         </form>
+      )}
       </FormContainer>
       <ToastContainer />
     </>
@@ -104,16 +129,18 @@ const FormContainer = styled.div`
   gap: 1rem;
   align-items: center;
   background-color: #131324;
-  .brand {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    justify-content: center;
-    img {
-      height: 5rem;
+  .row {
+    label {
+      display: block;
+      margin: 10px 0 0 5px;
+      transition: 0.2s ease-in-out;
+      height: 0%.5rem;
     }
-    h1 {
-      color: white;
+    label.success {
+      color: #39ff14;
+    }
+    label.danger {
+      color: #ff3131;
     }
   }
 
@@ -138,6 +165,18 @@ const FormContainer = styled.div`
       outline: none;
     }
   }
+  .success {
+    border-color: #39ff14;
+    &:focus {
+      border-color: #39ff14;
+    }
+  }
+  .danger {
+    border-color: #ff3131;
+    &:focus {
+      border-color: #ff3131;
+    }
+  }
   .btn {
     background-color: #4e0eff ;
     color: white;
@@ -156,10 +195,5 @@ const FormContainer = styled.div`
   span {
     color: white;
     text-transform: uppercase;
-    a {
-      color: #4e0eff;
-      text-decoration: none;
-      font-weight: bold;
-    }
   }
 `;

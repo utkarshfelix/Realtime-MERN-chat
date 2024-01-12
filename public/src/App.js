@@ -4,7 +4,7 @@ const Register = lazy(() => import('./pages/Register'));
 const Login = lazy(() => import('./pages/Login'));
 const SetAvatar = lazy(() => import('./components/SetAvatar'));
 const Chat = lazy(() => import('./pages/Chat'));
-
+const SetUsername = lazy(() => import("./pages/SetUsername"))
 export default function App() {
   return (
     <BrowserRouter>
@@ -13,6 +13,7 @@ export default function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/setAvatar" element={<SetAvatar />} />
+        <Route path="/setusername" element={< SetUsername />} />
         <Route path="/" element={<Chat />} />
       </Routes>
       </Suspense>
